@@ -1,0 +1,9 @@
+/**
+ * 
+ */
+/**
+ * 
+ */
+module IA {
+	requires jFuzzyLogic;
+}
