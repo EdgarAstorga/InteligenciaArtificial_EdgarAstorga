@@ -1,0 +1,163 @@
+from operator import attrgetter
+import sys
+sys.setrecursionlimit(10000)
+
+class Ciudad:
+    def __init__(self, id, hijos, distanciaHijos, distanciaLRHijos):
+        self.id = id
+        self.hijos = hijos
+        self.distanciaHijos = distanciaHijos
+        self.distanciaLRHijos = distanciaLRHijos    
+
+    def get_id(self):
+        return self.id
+    
+    def get_hijos(self):
+        return self.hijos
+    
+    def get_distanciaHijos(self):
+        return self.distanciaHijos
+    
+    def get_distanciaLRHijos(self):
+        return self.distanciaLRHijos
+
+class Nodo:
+    def __init__(self, id, g, h, f, listaCiudades):
+        self.id=id
+        self.g=g
+        self.h=h
+        self.f=f
+        self.acumuladoG=0
+        self.ruta=[]
+        self.listaCiudades = listaCiudades
+
+    def get_id(self):
+        return self.id
+    
+    def get_g(self):
+        return self.g
+    
+    def set_g(self, g):
+        self.g=g
+
+    def get_h(self):
+        return self.h
+    
+    def set_h(self, h):
+        self.h=h
+
+    def get_f(self):
+        return self.f
+    
+    def set_f(self, f):
+        self.f=f
+    
+    def get_acumuladoG(self):
+        return self.acumuladoG
+    
+    def set_acumuladoG(self, acumuladoG):
+        self.acumuladoG = acumuladoG
+    
+    def get_ruta(self):
+        return self.ruta
+    
+    def set_ruta(self, ruta):
+        self.ruta = ruta
+    
+    def get_listaCiudades(self):
+        return self.listaCiudades
+    
+    def set_listaCiudades(self, listaCiudades):
+        self.listaCiudades = listaCiudades
+    
+    def imprimir_contenido(self):
+        print(f"Id: {self.id}, g: {self.g}, h: {self.h}, f: {self.f}")
+    
+
+listaNombreCiudad=[ "Arad", "Bucharest", "Craiova", "Dobreta", "Eforie", "Fagaras",         
+                    "Giurgu", "Hirsova", "Lasi", "Lugoj", "Mehadia", "Neamt",          
+                    "Oradea", "Pitesti", "Riminicu Vilcea", "Sibiu",           
+                    "Timisoara", "Urziceni", "Vaslui", "Zerind"]          
+
+listaCiudades = []
+listaCiudades.append(Ciudad(0,[19,15,16],[75,140,118],[374,253,329]))
+listaCiudades.append(Ciudad(1,[5,17,6,13],[211,85,90,101],[178,80,77,98]))
+listaCiudades.append(Ciudad(2,[3,14,13],[120,146,138],[242,193,98]))
+listaCiudades.append(Ciudad(3,[10,2],[75,120],[241,160]))
+listaCiudades.append(Ciudad(4,[7],[86],[151]))
+listaCiudades.append(Ciudad(5,[15,1],[99,211],[253,0]))
+listaCiudades.append(Ciudad(6,[1],[90],[0]))
+listaCiudades.append(Ciudad(7,[17,4],[98,86],[80,161]))
+listaCiudades.append(Ciudad(8,[11,18],[87,92],[234,199]))
+listaCiudades.append(Ciudad(9,[16,10],[111,70],[329,241]))
+listaCiudades.append(Ciudad(10,[9,3],[70,75],[244,242]))
+listaCiudades.append(Ciudad(11,[8],[87],[226]))
+listaCiudades.append(Ciudad(12,[19,15],[71,151],[374,253]))
+listaCiudades.append(Ciudad(13,[14,1,2],[97,101,138],[193,0,160]))
+listaCiudades.append(Ciudad(14,[15,13,2],[80,97,146],[253,98,160]))
+listaCiudades.append(Ciudad(15,[12,0,5,14],[151,140,99,80],[380,366,178,193]))
+listaCiudades.append(Ciudad(16,[0,9],[118,111],[366,244]))
+listaCiudades.append(Ciudad(17,[1,18,7],[85,142,98],[0,199,151]))
+listaCiudades.append(Ciudad(18,[17,8],[142,92],[80,226]))
+listaCiudades.append(Ciudad(19,[12,0],[71,75],[380,366]))
+
+def aEstrella(f,blackL):
+    if not f:
+        print("Solucion no encontrada")
+        return
+    else:
+        ea=f.pop(0)
+        blackL.append(ea)
+        ruta=ea.get_ruta()
+        ruta.append(ea.get_id())
+        if goalTest(ea):
+            print("SOLUCION ENCONTRADA")
+            print("RUTA")
+            rutaCompleta=ea.get_ruta()
+            for i in range(len(rutaCompleta)):
+                print(rutaCompleta[i])
+            return
+        else:
+            os1=expand(ea,blackL)
+            os2=evaluate(os1)
+        return aEstrella(os2,blackL)
+    
+def goalTest(ea):
+    if ea.get_id()==1:
+        return True
+    return False
+
+def expand(ea,blackL):
+    listaNodos = []
+    listaC = ea.get_listaCiudades()
+    acomuladoG=ea.get_g()
+    ruta=ea.get_ruta()
+    hijos = listaC[ea.get_id()].get_hijos()
+    g=listaC[ea.get_id()].get_distanciaHijos()
+    h=listaC[ea.get_id()].get_distanciaLRHijos()
+    for i in range(len(hijos)):
+        nuevoNodo = Nodo(hijos[i],acomuladoG+g[i],h[i],0,ea.get_listaCiudades())
+        if not comprueba(nuevoNodo, blackL):
+            nuevoNodo.set_ruta(ruta)
+            listaNodos.append(nuevoNodo)
+    return listaNodos
+
+def evaluate(listaNodos):
+    print("Nodos Hijo")
+    for i in range(len(listaNodos)):
+        listaNodos[i].set_f(listaNodos[i].get_g()+listaNodos[i].get_h())
+        listaNodos[i].imprimir_contenido()
+
+    listaNodos.sort(key=attrgetter('f'))
+    return listaNodos
+
+def comprueba(ea, listaN):
+    existe = any(getattr(nodo, "id", None)== ea.get_id() for nodo in listaN)
+    return existe
+
+f=[]
+
+nodoInicial = Nodo(0,0,0,0,listaCiudades)
+bl=[]
+f.append(nodoInicial)
+aEstrella(f,bl)
